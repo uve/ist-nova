@@ -1,0 +1,8 @@
+www/www/upload/*
+*.log
+www/logs/*
+.*
+!.gitignore
+!.htaccess
+*~
+.pyc
