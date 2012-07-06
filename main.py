@@ -42,27 +42,31 @@ class MainPage(webapp2.RequestHandler):
     def get(self):
         
         login_url = users.create_login_url(self.request.uri)
+        logout_url = users.create_logout_url(self.request.uri)
         
         template_values = {            
-            'login_url': login_url
+            'login_url': login_url,
+            'logout_url': logout_url,            
         }
 
 
         google_user = users.get_current_user()
         
-        if google_user:
-            user = models.User.get_item(google_user.user_id())
-            if not user:
-                user = models.User(key_name=str(google_user.user_id()), id=str(google_user.user_id()),
-                    name=google_user.email())
-                user.put()
-                user = models.User.get_item(google_user.user_id())  
-        else:
-            self.redirect(login_url)
+        if not google_user:
+            return self.redirect(login_url)
             
-               
+        user_id = google_user.user_id()
+        user = models.User.get_item(user_id)
+        if user is None:
+            user = models.User(key_name=str(google_user.user_id()), id=str(google_user.user_id()),
+                name=google_user.email())
+            user.put()
+            user = models.User.get_item(google_user.user_id())  
+            
+            
         template = jinja_environment.get_template('templates/index.html')
         self.response.out.write(template.render(template_values))
+
 
 
 
