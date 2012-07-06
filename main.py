@@ -21,6 +21,8 @@ import webapp2
 import jinja2
 import os
 
+import models
+
 jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
@@ -45,6 +47,19 @@ class MainPage(webapp2.RequestHandler):
             'login_url': login_url
         }
 
+
+        google_user = users.get_current_user()
+        
+        if google_user:
+            user = models.User.get_item(google_user.user_id())
+            if not user:
+                user = models.User(key_name=str(google_user.user_id()), id=str(google_user.user_id()),
+                    name=google_user.email())
+                user.put()
+                user = models.User.get_item(google_user.user_id())  
+        else:
+            self.redirect(login_url)
+            
                
         template = jinja_environment.get_template('templates/index.html')
         self.response.out.write(template.render(template_values))
