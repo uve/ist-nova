@@ -9,7 +9,7 @@
         <title>
         </title>
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" />
-        <link rel="stylesheet" href="my.css" />
+        <link rel="stylesheet" href="static/my.css" />
         <style>
             /* App custom styles */
         </style>
@@ -27,23 +27,119 @@
         </script>
         <script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js">
         </script>
-        <script src="my.js">
+        <script src="static/my.js">
         </script>
     </head>
     <body>
         <!-- Home -->
+
+
+
+
+
+    <div data-role="page" id="page-1" data-theme="c">
+            <div data-role="header">
+        		<h1>Опрос Ист-Нова</h1>
+		        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>
+	            
+		        <a href="{{ logout_url }}" data-icon="arrow-l" data-rel="button">Выйти</a>
+		            
+	        </div><!-- /header -->
+	
+	
+            <div data-role="content" style="padding: 15px">
+                <h3>Пожалуйста ответьте на неколько вопросов</h3>
+                <h3>Нам очень важно знать Ваше мнение</h3>
+                <div data-role="fieldcontain">
+				   <fieldset data-role="controlgroup">		
+				   
+				   <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade"
+				        href="#page-{{ first }}">
+                    Начать опрос
+                </a>	
+				   
+				   </fieldset>			
+				   
+                </div>               
+            </div>
+            
+    </div>
+    
+    
         
-        {% include 'templates/app1.html' %}
-        {% include 'templates/app1a.html' %}
-        {% include 'templates/app2.html' %}
-        {% include 'templates/app3.html' %}
-        {% include 'templates/app4.html' %}
-        {% include 'templates/app4a.html' %}
-        {% include 'templates/app5.html' %}
-        {% include 'templates/app6.html' %}
-        {% include 'templates/app7.html' %}
-        {% include 'templates/app8.html' %}
         
+        
+    {% for question in all_questions %}
+        <div data-role="page" id="page-{{ question.id }}">
+            <div data-role="header">
+        		<h1>Опрос Ист-Нова</h1>
+		        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>	            
+	        </div>
+	        
+            <div data-role="content" style="padding: 15px">
+                <h3>{{ question.name }}</h3>
+                <div data-role="fieldcontain">
+				   <fieldset data-role="controlgroup">			
+				   
+				   
+				   {% if question.multiple %}
+				   
+				   
+				        <legend>Выберите нужные варианты:</legend>
+        
+                        
+				      {% for answer in question.answers %}
+				       	
+			         	<input name="checkbox-{{ answer.id }}" required="required" id="checkbox-{{ answer.id }}" type="checkbox" /> 
+			         	<label for="checkbox-{{ answer.id }}">{{ answer.name }}</label>
+			         	
+			          {% endfor %}                        
+                        
+                        
+                   {% else %}
+                        
+                        	
+				   
+				      {% for answer in question.answers %}
+				       	
+			         	<input type="radio" name="radio-choice-1" required="required" id="radio-choice-{{ answer.id }}" value="{{ answer.id }}" />
+			         	<label for="radio-choice-{{ answer.id }}">{{ answer.name }}</label>
+			         	
+			          {% endfor %}
+			          
+			       {% endif %}
+			          	
+						         	
+				    </fieldset>
+                </div>
+                
+                {% if not loop.first %}
+                <a data-role="button" data-inline="true" data-icon="back" data-transition="fade" href="#page-{{ question.prev }}">
+                    Назад
+                </a>
+                {% endif %}
+                
+                                       
+                      
+                {% if not loop.last %}
+                <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">
+                    Вперед
+                </a>
+                {% else %}
+                <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">
+                    Отправить
+                </a>                
+                {% endif %}
+                
+
+            </div>
+            
+            
+        </div>
+    {% endfor %}
+       
+       
+             
         <script>
 
             //App custom javascript

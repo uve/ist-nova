@@ -21,6 +21,7 @@ from google.appengine.ext import db
 
 class CustomModel(db.Model):
     
+    id = db.StringProperty(required=True)    
     created  = db.DateTimeProperty(auto_now_add=True)
     
     @classmethod
@@ -77,7 +78,7 @@ class CustomModel(db.Model):
                
             
 class User(CustomModel):
-    id = db.StringProperty(required=True)
+
     updated = db.DateTimeProperty(auto_now=True)
     name = db.StringProperty(required=True)
     profile_url = db.StringProperty(required=False)
@@ -88,14 +89,19 @@ class User(CustomModel):
 class Question(CustomModel):
     
     name = db.StringProperty(required=False)
-    content = db.TextProperty()
-    last_modified = db.DateTimeProperty(required=True, auto_now=True)
+    
+    multiple = db.BooleanProperty(required=True)
+    order = db.IntegerProperty(required=True)
+    
+    additional = db.SelfReferenceProperty(collection_name='question_additional', required=False)
 
 
 class Answer(CustomModel):
     
     name = db.StringProperty(required=False)
     question_id = db.ReferenceProperty(Question, collection_name='question_answers', required=True)
+    
+    order = db.IntegerProperty(required=True)
     
     
 class Vote(CustomModel):
