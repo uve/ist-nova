@@ -15,20 +15,15 @@
         </style>
         
 
-
-<script type='text/javascript' charset='utf-8'>
-    // Hides mobile browser's address bar when page is done loading.
-      window.addEventListener('load', function(e) {
-        setTimeout(function() { window.scrollTo(0, 1); }, 1);
-      }, false);
-</script>
-
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
         </script>
         <script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js">
         </script>
         <script src="static/my.js">
         </script>
+        
+        
+
     </head>
     <body>
         <!-- Home -->
@@ -139,10 +134,43 @@
     {% endfor %}
        
        
-             
+       
         <script>
+        	
+        
+        
+        $(document).bind( 'pagebeforechange',function(event){
+        	  console.log( 'This page was just inserted into the dom!' );
+        	  $(':input')
+        	  .not(':button, :submit, :reset, :hidden')
+        	  .val('')
+        	  .removeAttr('checked')
+        	  .removeAttr('selected');
+        	});
+      
+        /*
+            $("#changePageButton").click(function() {
+                $.mobile.changePage("#page2");
+            });        
+          */  
+            /*$(document).bind("pagebeforechange", function ( event , data ) {
+            $('#page-1001').bind( "pagebeforechange", function( e, data ) { 
+                console.log(data.options.fromPage.attr('data-url'));
+            });
+            
+            */
+            
+            $( "#page-1001" ).bind( 'pagebeforechange',function(event){
+            	  alert( 'This page was just inserted into the dom!' );
+            	});
 
-            //App custom javascript
+        
+        window.addEventListener('load', function(e) {
+        	setTimeout(function() { window.scrollTo(0,1); }, 1);
+        }, false);
+        
+        
+        //App custom javascript
         </script>
     </body>
 </html>
