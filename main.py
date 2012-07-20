@@ -39,21 +39,17 @@ class Greeting(db.Model):
     date = db.DateTimeProperty(auto_now_add=True)
 
 
-
-
-class MainPage(webapp2.RequestHandler):
-    def get(self):
+def login_required(func):
+    def check_auth(*args, **kwargs):
+        #print "Authenticated."              
         
-        login_url = users.create_login_url(self.request.uri)
-        logout_url = users.create_logout_url(self.request.uri)
-        
-
-
+        login_url = users.create_login_url(args[0].request.uri)
+        args[0].request.logout_url = users.create_logout_url(args[0].request.uri)        
 
         google_user = users.get_current_user()
         
         if not google_user:
-            return self.redirect(login_url)
+            return args[0].redirect(login_url)
             
         user_id = google_user.user_id()
         user = models.User.get_item(user_id)
@@ -62,7 +58,21 @@ class MainPage(webapp2.RequestHandler):
                 name=google_user.email())
             user.put()
             user = models.User.get_item(google_user.user_id())  
-         
+        
+        args[0].request.user_id = user    
+            
+        return func(*args, **kwargs)
+    
+    return check_auth
+    
+
+
+
+class MainPage(webapp2.RequestHandler):
+    
+    @login_required
+    def get(self):
+                       
         
         all_questions = models.Question.all().fetch(100)
         
@@ -83,9 +93,9 @@ class MainPage(webapp2.RequestHandler):
         
         
          
-        template_values = {            
-            'login_url': login_url,
-            'logout_url': logout_url,        
+        template_values = {                        
+            'logout_url': self.request.logout_url,
+            'user_id': self.request.user_id,        
             'all_questions': all_questions,
             'first': first,    
         }    
@@ -96,43 +106,29 @@ class MainPage(webapp2.RequestHandler):
 
 
 
-class MainPage2(webapp2.RequestHandler):
-  def get(self):
-    self.response.out.write('<html><body>')
-
-    greetings = db.GqlQuery("SELECT * "
-                            "FROM Greeting "
-                            "ORDER BY date DESC LIMIT 10")
-
-    for greeting in greetings:
-      if greeting.author:
-        self.response.out.write('<b>%s</b> wrote:' % greeting.author.nickname())
-      else:
-        self.response.out.write('An anonymous person wrote:')
-      self.response.out.write('<blockquote>%s</blockquote>' %
-                              cgi.escape(greeting.content))
 
 
-    self.response.out.write("""
-          <form action="/sign" method="post">
-            <div><textarea name="content" rows="3" cols="60"></textarea></div>
-            <div><input type="submit" value="Sign Guestbook"></div>
-          </form>
-        </body>
-      </html>""")
-
-
-class Guestbook(webapp2.RequestHandler):
-  def post(self):
-    greeting = Greeting()
-
-    if users.get_current_user():
-      greeting.author = users.get_current_user()
-
-    greeting.content = self.request.get('content')
-    greeting.put()
-    self.redirect('/')
+class Vote(webapp2.RequestHandler):
     
+    @login_required
+    def post(self):
+        
+        
+        guestbook_name = self.request.get('guestbook_name')
+        
+                    
+        params = {                    
+                    'question_id': question_id,
+                    'answer_id': answer_id,
+                    'user_id': self.request.user_id
+                  }  
+            
+        new_vote = models.Vote.create(params)
+        
+        self.response.out.write("ok")
+
+
+
     
     
 def create(question = "", answers = [], multiple = False, additional = None):
@@ -215,6 +211,7 @@ class Create(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
   ('/', MainPage),
-  ('/sign', Guestbook),
+  #('/vote', Vote),
+  #('/stat', Stat),
   ('/create', Create)
 ], debug=True)

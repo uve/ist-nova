@@ -31,8 +31,8 @@
 
 
 
-
-    <div data-role="page" id="page-1" data-theme="c">
+    
+    <form action="form.php" method="post" data-role="page" id="page-1" data-theme="c">
             <div data-role="header">
         		<h1>Опрос Ист-Нова</h1>
 		        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>
@@ -58,14 +58,14 @@
                 </div>               
             </div>
             
-    </div>
+    </form>
     
     
         
         
         
     {% for question in all_questions %}
-        <div data-role="page" id="page-{{ question.id }}">
+        <form action="/vote" method="post" data-role="page" id="page-{{ question.id }}">
             <div data-role="header">
         		<h1>Опрос Ист-Нова</h1>
 		        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>	            
@@ -97,8 +97,8 @@
 				   
 				      {% for answer in question.answers %}
 				       	
-			         	<input type="radio" name="radio-choice-1" required="required" id="radio-choice-{{ answer.id }}" value="{{ answer.id }}" />
-			         	<label for="radio-choice-{{ answer.id }}">{{ answer.name }}</label>
+			         	<input type="radio" name="answer[]" required="required" id="answer-{{ answer.id }}" value="{{ answer.id }}" />
+			         	<label for="answer-{{ answer.id }}">{{ answer.name }}</label>
 			         	
 			          {% endfor %}
 			          
@@ -117,9 +117,10 @@
                                        
                       
                 {% if not loop.last %}
-                <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">
+               <!--  <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">
                     Вперед
-                </a>
+                </a>  -->
+                <button type="submit" data-inline="true" data-icon="forward" data-transition="fade" data-theme="b" name="submit" value="#page-{{ question.next }}">Вперед</button>
                 {% else %}
                 <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">
                     Отправить
@@ -130,29 +131,42 @@
             </div>
             
             
-        </div>
+        </form>
     {% endfor %}
        
        
        
         <script>
+        /*	
+        
+        $(function() {
         	
+        	
+        	$( "#page-1001" ).bind( 'pagebeforechange',function(event){
+	            
+        		console.log('hello4');
+          	  
+        	});
+        	
+        });
+        */
         
         
         $(document).bind( 'pagebeforechange',function(event){
-        	  console.log( 'This page was just inserted into the dom!' );
-        	  $(':input')
-        	  .not(':button, :submit, :reset, :hidden')
-        	  .val('')
-        	  .removeAttr('checked')
-        	  .removeAttr('selected');
+        	
+        	console.log($(this));
+/*        	          	  
+        	  $("input[type='checkbox']").prop("checked",false).checkboxradio("refresh");        	  
+
+        	  $("input[type='radio']").prop("checked",false).checkboxradio("refresh");
+        	  */
         	});
       
         /*
             $("#changePageButton").click(function() {
                 $.mobile.changePage("#page2");
             });        
-          */  
+        */  
             /*$(document).bind("pagebeforechange", function ( event , data ) {
             $('#page-1001').bind( "pagebeforechange", function( e, data ) { 
                 console.log(data.options.fromPage.attr('data-url'));
@@ -160,9 +174,7 @@
             
             */
             
-            $( "#page-1001" ).bind( 'pagebeforechange',function(event){
-            	  alert( 'This page was just inserted into the dom!' );
-            	});
+            
 
         
         window.addEventListener('load', function(e) {
