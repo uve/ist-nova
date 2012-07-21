@@ -112,20 +112,25 @@ class Vote(webapp2.RequestHandler):
     
     @login_required
     def post(self):
+                
+        all_answers = self.request.get_all('answer[]')
         
         
-        guestbook_name = self.request.get('guestbook_name')
+        for item in all_answers:
         
+            answer_id = models.Answer.get_item(item)
+            question_id = answer_id.question_id
                     
-        params = {                    
-                    'question_id': question_id,
-                    'answer_id': answer_id,
-                    'user_id': self.request.user_id
-                  }  
-            
-        new_vote = models.Vote.create(params)
+            logging.info("Question: %s \t Answer: %s", question_id.id, item)        
         
-        self.response.out.write("ok")
+            params = {                    
+                        'question_id': question_id,
+                        'answer_id': answer_id,
+                        'user_id': self.request.user_id
+                      }  
+            #new_vote = models.Vote.create(params)
+        
+        #self.response.out.write("ok")
 
 
 
@@ -211,7 +216,7 @@ class Create(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
   ('/', MainPage),
-  #('/vote', Vote),
+  ('/vote', Vote),
   #('/stat', Stat),
   ('/create', Create)
 ], debug=True)

@@ -62,10 +62,10 @@
     
     
         
-        
+   
         
     {% for question in all_questions %}
-        <form action="/vote" method="post" data-role="page" id="page-{{ question.id }}">
+        <form action="/vote" method="post"  data-role="page" id="page-{{ question.id }}">
             <div data-role="header">
         		<h1>Опрос Ист-Нова</h1>
 		        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>	            
@@ -80,12 +80,12 @@
 				   {% if question.multiple %}
 				   
 				   
-				        <legend>Выберите нужные варианты:</legend>
+				        <h4>Выберите нужные варианты:</h4>
         
                         
 				      {% for answer in question.answers %}
 				       	
-			         	<input name="checkbox-{{ answer.id }}" required="required" id="checkbox-{{ answer.id }}" type="checkbox" /> 
+			         	<input name="answer[]"  id="checkbox-{{ answer.id }}" type="checkbox" value="{{ answer.id }}" {% if loop.first %} {% endif %}/> 
 			         	<label for="checkbox-{{ answer.id }}">{{ answer.name }}</label>
 			         	
 			          {% endfor %}                        
@@ -120,11 +120,16 @@
                <!--  <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">
                     Вперед
                 </a>  -->
-                <button type="submit" data-inline="true" data-icon="forward" data-transition="fade" data-theme="b" name="submit" value="#page-{{ question.next }}">Вперед</button>
+                
+                
+               
+                    <a data-role="button" data-inline="true"  data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">Вперед</a>
                 {% else %}
-                <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">
-                    Отправить
-                </a>                
+                
+                 <a data-role="button" data-inline="true"  data-icon="forward" data-transition="fade" id="ttt">Вперед555</a>
+                 
+                 
+                 <button type="submit" data-inline="true" data-icon="forward" data-transition="fade" data-theme="b" name="submit" value="#page-{{ question.next }}">Отправить</button>     
                 {% endif %}
                 
 
@@ -133,11 +138,10 @@
             
         </form>
     {% endfor %}
-       
-       
+          
        
         <script>
-        /*	
+        
         
         $(function() {
         	
@@ -148,13 +152,25 @@
           	  
         	});
         	
+        	$( '#ttt' ).live( 'click' ,function(event){
+        	
+        	
+        	    console.log('hello5');
+          	  
+	            
+	            $("form").submit();
+          	  
+        	});
+        	
+        	/*$("form").submit(function () { return false; });*/ // so it won't submit
+        	
         });
-        */
+        
         
         
         $(document).bind( 'pagebeforechange',function(event){
         	
-        	console.log($(this));
+        	console.log($( 'form'));
 /*        	          	  
         	  $("input[type='checkbox']").prop("checked",false).checkboxradio("refresh");        	  
 
