@@ -166,11 +166,17 @@
         	
         });
         
-        
+        $( "#page-1001" ).bind( 'pagebeforechange',function(event){
+	            
+        		console.log('hello4');
+          	  
+        	});
         
         $(document).bind( 'pagebeforechange',function(event){
         	
-        	console.log($( 'form'));
+        	/*$("form").submit();*/
+        	
+        	//console.log($( 'form'));
 /*        	          	  
         	  $("input[type='checkbox']").prop("checked",false).checkboxradio("refresh");        	  
 
