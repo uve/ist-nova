@@ -73,31 +73,10 @@ class MainPage(webapp2.RequestHandler):
     @login_required
     def get(self):
                        
-        
-        all_questions = models.Question.all().fetch(100)
-        
-        last = None
-        first = None
-        
-        for item in all_questions:
-
-            item.answers = models.Answer.gql("WHERE question_id = :1", item).fetch(100)
-            
-            if last: 
-                last.next = item.id
-                item.prev =  last.id
-            else:
-                first = item.id
-                
-            last = item
-        
-        
          
         template_values = {                        
             'logout_url': self.request.logout_url,
             'user_id': self.request.user_id,        
-            'all_questions': all_questions,
-            'first': first,    
         }    
             
         template = jinja_environment.get_template('templates/index.html')
@@ -105,17 +84,68 @@ class MainPage(webapp2.RequestHandler):
 
 
 
+class Order(webapp2.RequestHandler):
+        
+    def get(self):
+                
+        questions = models.Question.gql("Order by id asc").fetch(100)
+        
+        last = None
+        
+        for item in questions:
+            item.prev = last
+            last = item
+ 
+            
+        questions.reverse()    
+ 
+        last = None
+               
+        for item in questions:
+            item.next = last
+            last = item     
+            
+        questions.reverse()   
+
+        db.put(questions)            
+
+            
+        self.response.out.write('Questions are ordered')
 
 
 
 class Vote(webapp2.RequestHandler):
     
     @login_required
-    def post(self):
+    def get(self, id):
+                
+        question = models.Question.get_item(id)
+        answers = models.Answer.gql("WHERE question_id = :1", question).fetch(100)
+                                    
+        template_values = {                        
+            'logout_url': self.request.logout_url,
+            'user_id': self.request.user_id,        
+            'question': question,
+            'answers': answers,
+            #'first': first,    
+        }    
+            
+        template = jinja_environment.get_template('templates/question.html')
+        self.response.out.write(template.render(template_values))
+        
+            
+    @login_required
+    def post(self, id):
                 
         all_answers = self.request.get_all('answer[]')
         
         
+        q_id = self.request.get('q_id')
+        
+        question = models.Question.get_item(q_id)
+        
+        
+                
         for item in all_answers:
         
             answer_id = models.Answer.get_item(item)
@@ -129,8 +159,16 @@ class Vote(webapp2.RequestHandler):
                         'user_id': self.request.user_id
                       }  
             #new_vote = models.Vote.create(params)
+            
+            #if item in 
+            #    question = question.next
         
         #self.response.out.write("ok")
+        
+        
+        
+        
+        self.get(question.next.id)
 
 
 
@@ -216,7 +254,9 @@ class Create(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
   ('/', MainPage),
-  ('/vote', Vote),
+  ('/vote/(\d+)/', Vote),
   #('/stat', Stat),
-  ('/create', Create)
+  ('/create', Create),
+  ('/order', Order)
+  
 ], debug=True)

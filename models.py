@@ -94,6 +94,9 @@ class Question(CustomModel):
     order = db.IntegerProperty(required=True)
     
     additional = db.SelfReferenceProperty(collection_name='question_additional', required=False)
+    
+    prev = db.SelfReferenceProperty(collection_name='question_prev', required=False)
+    next = db.SelfReferenceProperty(collection_name='question_next', required=False)
 
 
 class Answer(CustomModel):
