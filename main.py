@@ -144,7 +144,7 @@ class Vote(webapp2.RequestHandler):
         
         question = models.Question.get_item(q_id)
         
-        
+        add = False
                 
         for item in all_answers:
         
@@ -160,13 +160,13 @@ class Vote(webapp2.RequestHandler):
                       }  
             #new_vote = models.Vote.create(params)
             
-            #if item in 
-            #    question = question.next
+            if item in ["1003", "1004", "1005", "1016", "1017", "1018"]:
+                add = True
         
-        #self.response.out.write("ok")
+        if add:
+            question = question.next
         
-        
-        
+        #self.response.out.write("ok")                
         
         self.get(question.next.id)
 
