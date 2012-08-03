@@ -27,7 +27,7 @@
     </head>
     <body>
         <!-- Home -->
-
+<form action="/vote/{{ question.next.id }}/" method="post" data-theme="c">
     <div data-role="page" id="page-1" data-theme="c">
             <div data-role="header">
         		<h1>Опрос Ист-Нова</h1>
@@ -45,7 +45,7 @@
                 			
 				   
 				   
-		       <form action="/vote/{{ question.next.id }}/" method="post" data-theme="c">
+		       
 		       
 		       	<fieldset>
 					<div data-role="fieldcontain">	
@@ -53,15 +53,12 @@
 		       <h3>{{ question.name }}</h3>	   
 		
 		
-		           <input type="hidden" id="q_id" name="q_id" value="{{ question.id }}" />
-		        			 
-		        			 
+		           <input type="hidden" id="q_id" name="q_id" value="{{ question.id }}" />		        			 		        			 
 		       
 				   {% if question.multiple %}
 		
 				   				   
-				     <h4>Выберите нужные варианты:</h4>
-                
+				     <h4>Выберите нужные варианты:</h4>                
                         
 				      {% for answer in answers %}
 				       	
@@ -75,7 +72,7 @@
 				      {% for answer in answers %}
 				       	
 			         	<input type="radio" name="answer[]" id="answer-{{ answer.id }}" value="{{ answer.id }}" />
-			         	<label for="answer-{{ answer.id }}">{{ answer.id }} - {{ answer.name }}</label>
+			         	<label for="answer-{{ answer.id }}">{{ answer.name }}</label>
 			         	
 			          {% endfor %}
 			          
@@ -97,11 +94,11 @@
              
 
               </fieldset>
-			</form>
+			
             
                 
     </div>
-          
+          </form>
        
         <script>                       
             

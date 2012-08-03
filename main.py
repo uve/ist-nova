@@ -16,8 +16,6 @@
 # limitations under the License.
 #
 
-import cgi
-import datetime
 import webapp2
 
 import jinja2
@@ -33,11 +31,7 @@ jinja_environment = jinja2.Environment(
 from google.appengine.ext import db
 from google.appengine.api import users
 
-class Greeting(db.Model):
-    author = db.UserProperty()
-    content = db.StringProperty(multiline=True)
-    date = db.DateTimeProperty(auto_now_add=True)
-
+import random
 
 def login_required(func):
     def check_auth(*args, **kwargs):
@@ -72,14 +66,48 @@ class MainPage(webapp2.RequestHandler):
     
     @login_required
     def get(self):
+        
+        
+        all_questions = models.Question.gql("Order by id asc").fetch(100)
                        
          
         template_values = {                        
             'logout_url': self.request.logout_url,
-            'user_id': self.request.user_id,        
+            'user_id': self.request.user_id,
+            'all_questions': all_questions        
         }    
             
         template = jinja_environment.get_template('templates/index.html')
+        self.response.out.write(template.render(template_values))
+
+
+
+
+class Stat(webapp2.RequestHandler):
+    
+    @login_required
+    def get(self):
+                         
+        all_questions = models.Question.gql("Order by id asc").fetch(100)
+        
+        
+        for item in all_questions:
+            
+            item.answers = models.Answer.gql("WHERE question_id = :1", item).fetch(100)
+            
+            for value in item.answers:
+                value.votes = random.randint(10, 1000)
+        
+        
+        
+        template_values = {                        
+            'logout_url': self.request.logout_url,
+            'user_id': self.request.user_id,
+            'all_questions': all_questions,
+            
+        }    
+            
+        template = jinja_environment.get_template('templates/stat.html')
         self.response.out.write(template.render(template_values))
 
 
@@ -92,16 +120,29 @@ class Order(webapp2.RequestHandler):
         
         last = None
         
-        for item in questions:
+        '''
+        for item in questions:                                            
+            if item.additional:
+                item.additional.is_additional = True
+            else:
+                item.additional.is_additional = False
+        '''
+        
+        
+        db.put(questions)        
+        
+        questions = models.Question.gql("Order by id asc").fetch(100)
+                
+        for item in questions:            
             item.prev = last
             last = item
- 
+            
             
         questions.reverse()    
  
         last = None
                
-        for item in questions:
+        for item in questions:        
             item.next = last
             last = item     
             
@@ -162,6 +203,8 @@ class Vote(webapp2.RequestHandler):
             
             if item in ["1003", "1004", "1005", "1016", "1017", "1018"]:
                 add = True
+                self.redirect("/vote/" + question.additional.id + "/")
+                return
         
         if add:
             question = question.next
@@ -255,7 +298,7 @@ class Create(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
   ('/', MainPage),
   ('/vote/(\d+)/', Vote),
-  #('/stat', Stat),
+  ('/stat', Stat),
   ('/create', Create),
   ('/order', Order)
   
