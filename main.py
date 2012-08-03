@@ -93,7 +93,7 @@ class Stat(webapp2.RequestHandler):
         
         for item in all_questions:
             
-            item.answers = models.Answer.gql("WHERE question_id = :1", item).fetch(100)
+            item.answers = models.Answer.gql("WHERE question_id = :1 ORDER by id asc", item).fetch(100)
             
             for value in item.answers:
                 value.votes = random.randint(10, 1000)
