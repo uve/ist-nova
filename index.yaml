@@ -4,3 +4,9 @@ indexes:
   properties:
   - name: question_id
   - name: id
+
+- kind: Vote
+  properties:
+  - name: answer_id
+  - name: user_id
+  - name: id  

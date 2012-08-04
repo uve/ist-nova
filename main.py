@@ -74,7 +74,8 @@ class MainPage(webapp2.RequestHandler):
         template_values = {                        
             'logout_url': self.request.logout_url,
             'user_id': self.request.user_id,
-            'all_questions': all_questions        
+            'all_questions': all_questions,
+            'is_main': True
         }    
             
         template = jinja_environment.get_template('templates/index.html')
@@ -82,11 +83,53 @@ class MainPage(webapp2.RequestHandler):
 
 
 
+class City(webapp2.RequestHandler):
+    
+    @login_required
+    def get(self):
+    
+        all_users = models.User.gql("Order by id asc").fetch(100)                   
+        
+        if self.request.user_id.name != "novosibirsk@ist-nova.ru":
+            all_users = [self.request.user_id]
+        
+        
+        
+        template_values = {                        
+            'logout_url': self.request.logout_url,
+            'user_id': self.request.user_id,
+            'all_users': all_users,            
+        }    
+            
+        template = jinja_environment.get_template('templates/city.html')
+        self.response.out.write(template.render(template_values))
+        
+
+class End(webapp2.RequestHandler):
+    
+    @login_required
+    def get(self):
+           
+        
+        template_values = {                        
+            'logout_url': self.request.logout_url,
+            'user_id': self.request.user_id
+
+        }    
+            
+        template = jinja_environment.get_template('templates/end.html')
+        self.response.out.write(template.render(template_values))        
+        
+
 
 class Stat(webapp2.RequestHandler):
     
     @login_required
-    def get(self):
+    def get(self, id):
+    
+        user = models.User.get_item(id)
+        
+        logging.info(user.name)
                          
         all_questions = models.Question.gql("Order by id asc").fetch(100)
         
@@ -96,14 +139,18 @@ class Stat(webapp2.RequestHandler):
             item.answers = models.Answer.gql("WHERE question_id = :1 ORDER by id asc", item).fetch(100)
             
             for value in item.answers:
-                value.votes = random.randint(10, 1000)
+                value.votes = models.Vote.gql("WHERE answer_id = :1 and user_id =:2 ORDER by id asc", value, user).count() + 1#random.randint(10, 1000)                
+                
+                logging.info(value.votes)
         
         
         
         template_values = {                        
             'logout_url': self.request.logout_url,
             'user_id': self.request.user_id,
+            'stat_user': self.request.user_id,            
             'all_questions': all_questions,
+            'is_stat': True
             
         }    
             
@@ -199,7 +246,7 @@ class Vote(webapp2.RequestHandler):
                         'answer_id': answer_id,
                         'user_id': self.request.user_id
                       }  
-            #new_vote = models.Vote.create(params)
+            new_vote = models.Vote.create(params)
             
             if item in ["1003", "1004", "1005", "1016", "1017", "1018"]:
                 add = True
@@ -209,6 +256,13 @@ class Vote(webapp2.RequestHandler):
         if add:
             question = question.next
         
+        
+        if question.id == "1009":
+            self.redirect("/end")
+            return
+            
+            
+        #self.response.out.write("ok")   
         #self.response.out.write("ok")                
         
         self.get(question.next.id)
@@ -298,8 +352,10 @@ class Create(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
   ('/', MainPage),
   ('/vote/(\d+)/', Vote),
-  ('/stat', Stat),
+  ('/city', City),
+  ('/stat/(\d+)/', Stat),
   ('/create', Create),
-  ('/order', Order)
+  ('/order', Order),
+  ('/end', End)
   
 ], debug=True)
