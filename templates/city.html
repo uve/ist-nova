@@ -1,0 +1,19 @@
+{% include "templates/header.html" %}
+	
+	
+            <div data-role="content" style="padding: 15px">
+                <h3>Выберите город</h3>
+                <div data-role="fieldcontain">
+				  
+				  
+				  {% for item in all_users %}				  
+                    <a data-role="button" data-inline="false" data-icon="forward" data-transition="fade"
+				        href="/stat/{{ item.id }}/">
+                    {{ item.name }}
+                </a>	
+				  {% endfor %}
+				  
+                </div>               
+            </div>
+            
+{% include "templates/footer.html" %}
