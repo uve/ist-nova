@@ -28,11 +28,8 @@
     <body>
         <!-- Home -->
 
-
-
-
     
-    <form action="form.php" method="post" data-role="page" id="page-1" data-theme="c">
+    <div data-role="page" id="page-1" data-theme="c">
             <div data-role="header">
         		<h1>Опрос Ист-Нова</h1>
 		        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>
@@ -49,7 +46,7 @@
 				   <fieldset data-role="controlgroup">		
 				   
 				   <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade"
-				        href="#page-{{ first }}">
+				        href="/vote/1001/">
                     Начать опрос
                 </a>	
 				   
@@ -58,87 +55,10 @@
                 </div>               
             </div>
             
-    </form>
+    </div>
     
     
-        
-   
-        
-    {% for question in all_questions %}
-        <form action="/vote" method="post"  data-role="page" id="page-{{ question.id }}">
-            <div data-role="header">
-        		<h1>Опрос Ист-Нова</h1>
-		        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>	            
-	        </div>
-	        
-            <div data-role="content" style="padding: 15px">
-                <h3>{{ question.name }}</h3>
-                <div data-role="fieldcontain">
-				   <fieldset data-role="controlgroup">			
-				   
-				   
-				   {% if question.multiple %}
-				   
-				   
-				        <h4>Выберите нужные варианты:</h4>
-        
-                        
-				      {% for answer in question.answers %}
-				       	
-			         	<input name="answer[]"  id="checkbox-{{ answer.id }}" type="checkbox" value="{{ answer.id }}" {% if loop.first %} {% endif %}/> 
-			         	<label for="checkbox-{{ answer.id }}">{{ answer.name }}</label>
-			         	
-			          {% endfor %}                        
-                        
-                        
-                   {% else %}
-                        
-                        	
-				   
-				      {% for answer in question.answers %}
-				       	
-			         	<input type="radio" name="answer[]" required="required" id="answer-{{ answer.id }}" value="{{ answer.id }}" />
-			         	<label for="answer-{{ answer.id }}">{{ answer.name }}</label>
-			         	
-			          {% endfor %}
-			          
-			       {% endif %}
-			          	
-						         	
-				    </fieldset>
-                </div>
-                
-                {% if not loop.first %}
-                <a data-role="button" data-inline="true" data-icon="back" data-transition="fade" href="#page-{{ question.prev }}">
-                    Назад
-                </a>
-                {% endif %}
-                
-                                       
-                      
-                {% if not loop.last %}
-               <!--  <a data-role="button" data-inline="true" data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">
-                    Вперед
-                </a>  -->
-                
-                
-               
-                    <a data-role="button" data-inline="true"  data-icon="forward" data-transition="fade" href="#page-{{ question.next }}">Вперед</a>
-                {% else %}
-                
-                 <a data-role="button" data-inline="true"  data-icon="forward" data-transition="fade" id="ttt">Вперед555</a>
-                 
-                 
-                 <button type="submit" data-inline="true" data-icon="forward" data-transition="fade" data-theme="b" name="submit" value="#page-{{ question.next }}">Отправить</button>     
-                {% endif %}
-                
 
-            </div>
-            
-            
-        </form>
-    {% endfor %}
-          
        
         <script>
         
@@ -146,11 +66,7 @@
         $(function() {
         	
         	
-        	$( "#page-1001" ).bind( 'pagebeforechange',function(event){
-	            
-        		console.log('hello4');
-          	  
-        	});
+        	/*
         	
         	$( '#ttt' ).live( 'click' ,function(event){
         	
@@ -161,11 +77,13 @@
 	            $("form").submit();
           	  
         	});
+        	*/
         	
         	/*$("form").submit(function () { return false; });*/ // so it won't submit
         	
         });
         
+<<<<<<< HEAD
         $( "#page-1001" ).bind( 'pagebeforechange',function(event){
 	            
         		console.log('hello4');
@@ -177,6 +95,18 @@
         	/*$("form").submit();*/
         	
         	//console.log($( 'form'));
+=======
+        
+        $(document).bind("pagebeforechange", function ( event , data ) {
+        	
+        	
+        	console.log("hello");
+        	
+        	if (($.mobile.activePage) && ($.mobile.activePage.attr("id") == "page-1001")){
+        		console.log($.mobile.activePage.attr("id"));
+        	}
+        	
+>>>>>>> 669c491abb6f8ed46958cf336b2011268e4a8c7e
 /*        	          	  
         	  $("input[type='checkbox']").prop("checked",false).checkboxradio("refresh");        	  
 

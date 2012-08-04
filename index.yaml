@@ -1,0 +1,6 @@
+indexes:
+  
+- kind: Answer
+  properties:
+  - name: question_id
+  - name: id

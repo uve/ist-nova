@@ -16,8 +16,6 @@
 # limitations under the License.
 #
 
-import cgi
-import datetime
 import webapp2
 
 import jinja2
@@ -33,11 +31,7 @@ jinja_environment = jinja2.Environment(
 from google.appengine.ext import db
 from google.appengine.api import users
 
-class Greeting(db.Model):
-    author = db.UserProperty()
-    content = db.StringProperty(multiline=True)
-    date = db.DateTimeProperty(auto_now_add=True)
-
+import random
 
 def login_required(func):
     def check_auth(*args, **kwargs):
@@ -72,32 +66,15 @@ class MainPage(webapp2.RequestHandler):
     
     @login_required
     def get(self):
+        
+        
+        all_questions = models.Question.gql("Order by id asc").fetch(100)
                        
-        
-        all_questions = models.Question.all().fetch(100)
-        
-        last = None
-        first = None
-        
-        for item in all_questions:
-
-            item.answers = models.Answer.gql("WHERE question_id = :1", item).fetch(100)
-            
-            if last: 
-                last.next = item.id
-                item.prev =  last.id
-            else:
-                first = item.id
-                
-            last = item
-        
-        
          
         template_values = {                        
             'logout_url': self.request.logout_url,
-            'user_id': self.request.user_id,        
-            'all_questions': all_questions,
-            'first': first,    
+            'user_id': self.request.user_id,
+            'all_questions': all_questions        
         }    
             
         template = jinja_environment.get_template('templates/index.html')
@@ -106,16 +83,110 @@ class MainPage(webapp2.RequestHandler):
 
 
 
+class Stat(webapp2.RequestHandler):
+    
+    @login_required
+    def get(self):
+                         
+        all_questions = models.Question.gql("Order by id asc").fetch(100)
+        
+        
+        for item in all_questions:
+            
+            item.answers = models.Answer.gql("WHERE question_id = :1 ORDER by id asc", item).fetch(100)
+            
+            for value in item.answers:
+                value.votes = random.randint(10, 1000)
+        
+        
+        
+        template_values = {                        
+            'logout_url': self.request.logout_url,
+            'user_id': self.request.user_id,
+            'all_questions': all_questions,
+            
+        }    
+            
+        template = jinja_environment.get_template('templates/stat.html')
+        self.response.out.write(template.render(template_values))
+
+
+
+class Order(webapp2.RequestHandler):
+        
+    def get(self):
+                
+        questions = models.Question.gql("Order by id asc").fetch(100)
+        
+        last = None
+        
+        '''
+        for item in questions:                                            
+            if item.additional:
+                item.additional.is_additional = True
+            else:
+                item.additional.is_additional = False
+        '''
+        
+        
+        db.put(questions)        
+        
+        questions = models.Question.gql("Order by id asc").fetch(100)
+                
+        for item in questions:            
+            item.prev = last
+            last = item
+            
+            
+        questions.reverse()    
+ 
+        last = None
+               
+        for item in questions:        
+            item.next = last
+            last = item     
+            
+        questions.reverse()   
+
+        db.put(questions)            
+
+            
+        self.response.out.write('Questions are ordered')
+
 
 
 class Vote(webapp2.RequestHandler):
     
     @login_required
-    def post(self):
+    def get(self, id):
+                
+        question = models.Question.get_item(id)
+        answers = models.Answer.gql("WHERE question_id = :1", question).fetch(100)
+                                    
+        template_values = {                        
+            'logout_url': self.request.logout_url,
+            'user_id': self.request.user_id,        
+            'question': question,
+            'answers': answers,
+            #'first': first,    
+        }    
+            
+        template = jinja_environment.get_template('templates/question.html')
+        self.response.out.write(template.render(template_values))
+        
+            
+    @login_required
+    def post(self, id):
                 
         all_answers = self.request.get_all('answer[]')
         
         
+        q_id = self.request.get('q_id')
+        
+        question = models.Question.get_item(q_id)
+        
+        add = False
+                
         for item in all_answers:
         
             answer_id = models.Answer.get_item(item)
@@ -129,8 +200,18 @@ class Vote(webapp2.RequestHandler):
                         'user_id': self.request.user_id
                       }  
             #new_vote = models.Vote.create(params)
+            
+            if item in ["1003", "1004", "1005", "1016", "1017", "1018"]:
+                add = True
+                self.redirect("/vote/" + question.additional.id + "/")
+                return
         
-        #self.response.out.write("ok")
+        if add:
+            question = question.next
+        
+        #self.response.out.write("ok")                
+        
+        self.get(question.next.id)
 
 
 
@@ -216,7 +297,9 @@ class Create(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
   ('/', MainPage),
-  ('/vote', Vote),
-  #('/stat', Stat),
-  ('/create', Create)
+  ('/vote/(\d+)/', Vote),
+  ('/stat', Stat),
+  ('/create', Create),
+  ('/order', Order)
+  
 ], debug=True)

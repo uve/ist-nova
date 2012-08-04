@@ -93,7 +93,12 @@ class Question(CustomModel):
     multiple = db.BooleanProperty(required=True)
     order = db.IntegerProperty(required=True)
     
+    
+    is_additional = db.BooleanProperty(required=False) 
     additional = db.SelfReferenceProperty(collection_name='question_additional', required=False)
+    
+    prev = db.SelfReferenceProperty(collection_name='question_prev', required=False)
+    next = db.SelfReferenceProperty(collection_name='question_next', required=False)
 
 
 class Answer(CustomModel):

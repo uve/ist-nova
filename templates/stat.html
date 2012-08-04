@@ -9,44 +9,89 @@
         <title>
         </title>
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" />
-        <link rel="stylesheet" href="my.css" />
+        <link rel="stylesheet" href="static/my.css" />
         <style>
             /* App custom styles */
         </style>
         
 
-
-<script type='text/javascript' charset='utf-8'>
-    // Hides mobile browser's address bar when page is done loading.
-      window.addEventListener('load', function(e) {
-        setTimeout(function() { window.scrollTo(0, 1); }, 1);
-      }, false);
-</script>
-
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
         </script>
         <script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js">
         </script>
-        <script src="my.js">
+        <script src="static/my.js">
         </script>
+        
+            <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      
+      
+      function drawChart() {
+    	  
+    	{% for item in all_questions %}
+    	  
+        var data = google.visualization.arrayToDataTable([
+                                                          
+		  {% for value in item.answers %}
+		  
+		  ['{{ value.name }}',     {{ value.votes }} ],
+				
+		  {% endfor %}
+			
+        ]);
+
+        var options = {
+          title: '{{ item.name }}'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div_{{ item.id }}'));
+        chart.draw(data, options);
+        
+        {% endfor %}
+        
+        
+      }
+    </script>
+
     </head>
     <body>
         <!-- Home -->
-        
-        {% include 'templates/app1.html' %}
-        {% include 'templates/app1a.html' %}
-        {% include 'templates/app2.html' %}
-        {% include 'templates/app3.html' %}
-        {% include 'templates/app4.html' %}
-        {% include 'templates/app4a.html' %}
-        {% include 'templates/app5.html' %}
-        {% include 'templates/app6.html' %}
-        {% include 'templates/app7.html' %}
-        {% include 'templates/app8.html' %}
-        
-        <script>
 
-            //App custom javascript
+    
+    <div data-role="page" id="page-1" data-theme="c">
+            <div data-role="header">
+        		<h1>Опрос Ист-Нова</h1>
+		        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>
+	            
+		        <a href="{{ logout_url }}" data-icon="arrow-l" data-rel="button">Выйти</a>
+		            
+	        </div><!-- /header -->
+	
+	
+            <div data-role="content" style="padding: 15px">
+                <h3>Статистика {{ user_id.name }}</h3>
+                <div data-role="fieldcontain">
+				  
+				  
+				  {% for item in all_questions %}				  
+				  <div id="chart_div_{{ item.id }}" style=" height: 500px;"></div>
+				  
+				 {% endfor %}
+				  
+                </div>               
+            </div>
+            
+    </div>
+    
+    
+
+       
+        <script>
+        
+      
+        //App custom javascript
         </script>
     </body>
 </html>
