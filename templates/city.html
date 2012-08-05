@@ -7,9 +7,9 @@
 				  
 				  
 				  {% for item in all_users %}				  
-                    <a data-role="button" data-inline="false" data-icon="forward" data-transition="fade"
+                    <a data-role="button" data-inline="false" data-ajax="false" data-icon="forward" data-transition="fade"
 				        href="/stat/{{ item.id }}/">
-                    {{ item.name }}
+                    {% if item.city %} {{ item.city }} {% else %} {{ item.name }} {% endif %}
                 </a>	
 				  {% endfor %}
 				  

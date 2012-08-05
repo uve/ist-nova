@@ -53,6 +53,7 @@ def login_required(func):
             user.put()
             user = models.User.get_item(google_user.user_id())  
         
+                
         args[0].request.user_id = user    
             
         return func(*args, **kwargs)
@@ -70,13 +71,22 @@ class MainPage(webapp2.RequestHandler):
         
         all_questions = models.Question.gql("Order by id asc").fetch(100)
                        
+        logout_url = users.create_logout_url("/")
          
         template_values = {                        
-            'logout_url': self.request.logout_url,
+            'logout_url': logout_url,
             'user_id': self.request.user_id,
             'all_questions': all_questions,
             'is_main': True
         }    
+        
+        '''
+        u = models.User.get_item("101218544535968046707")
+        u.city = u"Тюмень"
+        u.put()
+        '''
+               
+ 
             
         template = jinja_environment.get_template('templates/index.html')
         self.response.out.write(template.render(template_values))
@@ -139,12 +149,12 @@ class Stat(webapp2.RequestHandler):
             item.answers = models.Answer.gql("WHERE question_id = :1 ORDER by id asc", item).fetch(100)
             
             for value in item.answers:
-                value.votes = models.Vote.gql("WHERE answer_id = :1 and user_id =:2 ORDER by id asc", value, user).count() + 1#random.randint(10, 1000)                
+                value.votes = models.Vote.gql("WHERE answer_id = :1 and user_id =:2 ORDER by id asc",
+                                             value, user).count() + 1#random.randint(10, 1000)                
                 
-                logging.info(value.votes)
+                #logging.info("%s : %s", value.votes, 	value.name)
         
-        
-        
+
         template_values = {                        
             'logout_url': self.request.logout_url,
             'user_id': self.request.user_id,
@@ -208,6 +218,17 @@ class Vote(webapp2.RequestHandler):
     def get(self, id):
                 
         question = models.Question.get_item(id)
+        
+        
+        prev_id = None
+        
+        if question.prev:
+            prev_id = question.prev.id
+        
+        if question.id in ["1003", "1007"]:
+            prev_id = question.prev.prev.id
+                
+        
         answers = models.Answer.gql("WHERE question_id = :1", question).fetch(100)
                                     
         template_values = {                        
@@ -215,6 +236,7 @@ class Vote(webapp2.RequestHandler):
             'user_id': self.request.user_id,        
             'question': question,
             'answers': answers,
+            'prev_id': prev_id
             #'first': first,    
         }    
             
@@ -250,7 +272,7 @@ class Vote(webapp2.RequestHandler):
             
             if item in ["1003", "1004", "1005", "1016", "1017", "1018"]:
                 add = True
-                self.redirect("/vote/" + question.additional.id + "/")
+                self.redirect("/vote/" + question.next.id + "/")
                 return
         
         if add:
@@ -260,12 +282,16 @@ class Vote(webapp2.RequestHandler):
         if question.id == "1009":
             self.redirect("/end")
             return
-            
+      
+      
+        if question.id in ["1001", "1005"]:
+            question = question.next
+  
             
         #self.response.out.write("ok")   
         #self.response.out.write("ok")                
         
-        self.get(question.next.id)
+        self.redirect("/vote/" + question.next.id + "/")
 
 
 

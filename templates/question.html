@@ -7,8 +7,8 @@
                 
                 			
 				   
-				<form action="/vote/{{ question.id }}/" method="post" data-theme="c">   
-		       
+				<form action="/vote/{{ question.id }}/" method="post" data-ajax="true" data-theme="c">   
+		        
 		       
 		       	<fieldset>
 					<div data-role="fieldcontain">	
@@ -48,7 +48,7 @@
                     На Главную
                 </a>
                {% else %}
-                <a data-role="button" data-inline="true" data-icon="back" data-transition="fade" href="/vote/{{ question.prev.id }}/">
+                <a data-role="button" data-inline="true" data-icon="back" data-transition="fade" href="/vote/{{ prev_id }}/">
                     Назад
                 </a>                
                {% endif %}               

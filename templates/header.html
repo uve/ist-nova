@@ -16,14 +16,48 @@
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
         </script>
+        
+               <script>
+       
+
+        $(document).bind("pagecrate", function () {
+            $.mobile.ajaxEnabled = false;
+                      $.mobile.urlHistory.ignoreNextHashChange = true; 
+          $.mobile.urlHistory.listeningEnabled = false;
+          $.mobile.hashListeningEnabled = false;
+
+
+            console.log("dfdF");
+        });
+        
+        
+
+       </script>
+            
+        
         <script src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js">
         </script>
         <script src="/static/my.js">
         </script>
+       
         
+       <script type="text/javascript">
+          
+          window.addEventListener('load', function(e) {
+            setTimeout(function() { window.scrollTo(0, 1); }, 1);
+          }, false);
+      
+      
+          setTimeout(function(){ window.location.href="/"; }, 600000);
+       </script> 
+        
+        
+
+            
+            
         {% if is_stat %}
         
-         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
@@ -34,6 +68,8 @@
     	{% for item in all_questions %}
     	  
         var data = google.visualization.arrayToDataTable([
+        
+          ['Ответ', 'Голосов'],
                                                           
 		  {% for value in item.answers %}
 		  
@@ -44,7 +80,8 @@
         ]);
 
         var options = {
-          title: '{{ item.name }}'
+          title: '{{ item.name }}',
+          legend: {/*position: 'top', */textStyle: {width: 200}},  
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('chart_div_{{ item.id }}'));
@@ -64,18 +101,17 @@
         <!-- Home -->
 
     
-    <div data-role="page" id="page-1" data-theme="c">
+    <div data-role="page" id="page-1" data-theme="c" style=="min-height: 1000px;">
             <div data-role="header">
         		<h1>Опрос Ист-Нова</h1>
 
 	
 		        {% if is_main %}
-    		        <a href="/city" data-icon="gear" data-iconpos="notext" data-direction="reverse" >Статистика</a>		        
-    		        <a href="{{ logout_url }}" data-icon="arrow-l" data-rel="button">Выйти</a>    		        
+    		        <a data-ajax="false" href="/city" data-icon="gear" data-iconpos="notext" data-direction="reverse" >Статистика</a> 
+    		        <a data-ajax="false" href="{{ logout_url }}" data-icon="arrow-l" data-rel="button">Выйти</a>    		        
 		        {% else %}
-        	        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>
+        	        <a data-ajax="false" href="/" data-icon="home" data-iconpos="notext" data-direction="reverse">На главную</a>
         	    {% endif %}
 	            
-
 		            
 	        </div><!-- /header -->

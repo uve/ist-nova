@@ -83,7 +83,7 @@ class User(CustomModel):
     name = db.StringProperty(required=True)
     profile_url = db.StringProperty(required=False)
     access_token = db.StringProperty(required=False)
-    
+    city = db.StringProperty(required=False)
                 
                            
 class Question(CustomModel):
