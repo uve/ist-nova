@@ -10,3 +10,8 @@ indexes:
   - name: answer_id
   - name: user_id
   - name: id  
+  
+- kind: Question
+  properties:
+  - name: enabled
+  - name: id

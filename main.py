@@ -68,7 +68,6 @@ class MainPage(webapp2.RequestHandler):
     @login_required
     def get(self):
         
-        
         all_questions = models.Question.gql("Order by id asc").fetch(100)
                        
         logout_url = users.create_logout_url("/")
@@ -85,9 +84,7 @@ class MainPage(webapp2.RequestHandler):
         u.city = u"Тюмень"
         u.put()
         '''
-               
- 
-            
+           
         template = jinja_environment.get_template('templates/index.html')
         self.response.out.write(template.render(template_values))
 
@@ -102,7 +99,6 @@ class City(webapp2.RequestHandler):
         
         if self.request.user_id.name != "novosibirsk@ist-nova.ru":
             all_users = [self.request.user_id]
-        
         
         
         template_values = {                        
@@ -140,6 +136,13 @@ class Stat(webapp2.RequestHandler):
         user = models.User.get_item(id)
         
         logging.info(user.name)
+        
+        
+        first = models.Question.get_item("1001")
+        total = models.Vote.gql("WHERE question_id = :1 and user_id =:2",
+                                             first, user).count() + 5
+        
+        
                          
         all_questions = models.Question.gql("Order by id asc").fetch(100)
         
@@ -160,7 +163,8 @@ class Stat(webapp2.RequestHandler):
             'user_id': self.request.user_id,
             'stat_user': self.request.user_id,            
             'all_questions': all_questions,
-            'is_stat': True
+            'is_stat': True,
+            'total': total
             
         }    
             
@@ -173,25 +177,32 @@ class Order(webapp2.RequestHandler):
         
     def get(self):
                 
+                
         questions = models.Question.gql("Order by id asc").fetch(100)
         
         last = None
         
-        '''
-        for item in questions:                                            
-            if item.additional:
-                item.additional.is_additional = True
-            else:
-                item.additional.is_additional = False
-        '''
         
+        for item in questions:                                            
+            if item.id == "1003":
+                item.enabled = False
+            else:
+                item.enabled = True
+        
+            if item.id in ["1002", "1006"]:
+                item.is_additional = True
+                
         
         db.put(questions)        
         
-        questions = models.Question.gql("Order by id asc").fetch(100)
+        questions = models.Question.gql("WHERE enabled=True Order by id asc").fetch(100)
                 
         for item in questions:            
             item.prev = last
+            
+            if last and last.is_additional:
+                item.prev = last.prev
+            
             last = item
             
             
@@ -222,12 +233,25 @@ class Vote(webapp2.RequestHandler):
         
         prev_id = None
         
-        if question.prev:
-            prev_id = question.prev.id
+        #if question.prev:
+        #    prev_id = question.prev.id
+            
+        #logging.info(self.request.headers['Referer'])
         
-        if question.id in ["1003", "1007"]:
-            prev_id = question.prev.prev.id
-                
+        #if question.id in ["1003", "1007"]:
+        #    prev_id = question.prev.prev.id
+             
+        #prev_id = self.request.headers['Referer']
+       
+        if question.prev:
+            prev_id = "/vote/" + question.prev.id + "/"
+        
+        
+        next_id = question.id
+        
+        if question.next:
+            next_id = question.next.id
+        
         
         answers = models.Answer.gql("WHERE question_id = :1", question).fetch(100)
                                     
@@ -236,7 +260,8 @@ class Vote(webapp2.RequestHandler):
             'user_id': self.request.user_id,        
             'question': question,
             'answers': answers,
-            'prev_id': prev_id
+            'prev_id': prev_id,
+            'next_id': next_id
             #'first': first,    
         }    
             
@@ -279,7 +304,7 @@ class Vote(webapp2.RequestHandler):
             question = question.next
         
         
-        if question.id == "1009":
+        if not question.next:
             self.redirect("/end")
             return
       
@@ -303,8 +328,8 @@ def create(question = "", answers = [], multiple = False, additional = None):
                 'name': question,
                 'multiple': multiple,
                 'order': 0,
-                'additional': additional               
-                
+                'additional': additional,               
+                'enabled': True
               }    
               
     new_question = models.Question.create(params)
@@ -323,11 +348,33 @@ def create(question = "", answers = [], multiple = False, additional = None):
     return new_question.key()
     
     
+    
+    
+def edit(question_id = "", answers = []):
+    
+              
+    new_question = models.Question.get_item(question_id)
+    
+    
+    for item in answers:
+    
+        params = {
+                    'name': item,
+                    'question_id': new_question,
+                    'order': 0
+                  }  
+            
+        new_answer = models.Answer.create(params)
+    
+    return new_question.key()
+    
+    
+    
 
 class Create(webapp2.RequestHandler):
   def get(self):
   
-    
+    '''
     
     key = create( question = u"Что Вы думаете о качестве обслуживания в целом?",
             answers  = [u"Отлично", u"Хорошо", u"Могло бы быть лучше", u"Плохо", u"Ужасно"],
@@ -347,7 +394,7 @@ class Create(webapp2.RequestHandler):
             answers  = [u"Да", u"Нет"])    
 
 
-    key = create( question = u"Соорентировал ли Вас продавец-консультант по действующим акциям? Предложил ли дополнительные скидки?",
+    key = create( question = u"Соориентировал ли Вас продавец-консультант по действующим акциям? Предложил ли дополнительные скидки?",
             answers  = [u"Да", u"Нет"])            
     
     
@@ -367,10 +414,24 @@ class Create(webapp2.RequestHandler):
             answers  = [u"Низкие", u"Приемлемые", u"Дорогие", u"Неоправданно высокие"])
 
     key = create( question = u"Считаю Вам необходимо обратить внимание на ...",
-            answers  = [u"Поведение продавцов-консультантов", u"Поведение охраны"],
+            answers  = [u"Работу продавцов-консультантов", u"Работу охраны"],
             multiple = True)                
     
     
+    '''
+    
+    
+ 
+    key = create( question = u"Отметьте из каких источников информации Вы узнали о магазине Ист-Нова (или о действующих скидках)?",
+            answers  = [u"ТВ", u"Радио", u"Интернет", u"Наружная реклама", u"Другое"],
+            multiple = True)       
+            
+
+    
+    edit(question_id = "1009", answers  = [u"Работу администратора торгового зала", u"Работу старшего продавца", u"Работу кассира", u"Работу сотрудника банка"])
+        
+     
+     
     self.redirect('/')
 
 

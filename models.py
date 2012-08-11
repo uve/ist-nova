@@ -100,7 +100,9 @@ class Question(CustomModel):
     prev = db.SelfReferenceProperty(collection_name='question_prev', required=False)
     next = db.SelfReferenceProperty(collection_name='question_next', required=False)
 
-
+    enabled = db.BooleanProperty(required=False, default=True)
+    
+    
 class Answer(CustomModel):
     
     name = db.StringProperty(required=False)

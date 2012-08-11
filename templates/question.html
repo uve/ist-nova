@@ -7,7 +7,7 @@
                 
                 			
 				   
-				<form action="/vote/{{ question.id }}/" method="post" data-ajax="true" data-theme="c">   
+				<form action="/vote/{{ next_id }}/" method="post" data-ajax="true" data-theme="c">   
 		        
 		       
 		       	<fieldset>
@@ -16,7 +16,7 @@
 		       <h3>{{ question.name }}</h3>	   
 		
 		
-		           <input type="hidden" id="q_id" name="q_id" value="{{ question.id }}" />		        			 		        			 
+		        <input type="hidden" id="q_id" name="q_id" value="{{ question.id }}" />
 		       
 				   {% if question.multiple %}
 		
@@ -48,13 +48,13 @@
                     На Главную
                 </a>
                {% else %}
-                <a data-role="button" data-inline="true" data-icon="back" data-transition="fade" href="/vote/{{ prev_id }}/">
+                <a data-role="button" data-inline="true" class="back" data-icon="back" data-transition="fade" href="{{ prev_id }}">
                     Назад
                 </a>                
                {% endif %}               
                 
                 
-                {% if question.id == "1009" %}
+                {% if not question.next %}
                  <button type="submit" data-inline="true" data-icon="check" data-theme="b" name="submit" value="submit-value">Отправить</button> 
                 {% else %}
                  <button type="submit" data-inline="true" data-icon="forward" data-theme="b" name="submit" value="submit-value">Вперед</button> 
