@@ -15,3 +15,15 @@ indexes:
   properties:
   - name: enabled
   - name: id
+  
+- kind: Answer
+  properties:
+  - name: enabled
+  - name: question_id
+  - name: order
+  
+- kind: Question
+  properties:
+  - name: enabled
+  - name: order
+

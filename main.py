@@ -46,6 +46,12 @@ def login_required(func):
             return args[0].redirect(login_url)
             
         user_id = google_user.user_id()
+        
+        #if google_user.email() == "nikita.grachev@gmail.com":
+        #    user_id = "107581787154497832805" 
+        #elif not google_user.email().endswith("ist-nova.ru"):
+        #    return args[0].redirect(login_url)
+        
         user = models.User.get_item(user_id)
         if user is None:
             user = models.User(key_name=str(google_user.user_id()), id=str(google_user.user_id()),
@@ -68,7 +74,7 @@ class MainPage(webapp2.RequestHandler):
     @login_required
     def get(self):
         
-        all_questions = models.Question.gql("Order by id asc").fetch(100)
+        all_questions = models.Question.gql("WHERE enabled=True Order by order asc").fetch(100)
                        
         logout_url = users.create_logout_url("/")
          
@@ -144,7 +150,7 @@ class Stat(webapp2.RequestHandler):
         
         
                          
-        all_questions = models.Question.gql("Order by id asc").fetch(100)
+        all_questions = models.Question.gql("WHERE enabled=True Order by order asc").fetch(100)
         
         
         for item in all_questions:
@@ -177,25 +183,32 @@ class Order(webapp2.RequestHandler):
         
     def get(self):
                 
-                
-        questions = models.Question.gql("Order by id asc").fetch(100)
-        
         last = None
         
+        questions = ["1001", "1009", "1007", "1008", "1004", "1005", "1006", "1010"] 
+ 
+  
+        order = 1       
         
-        for item in questions:                                            
-            if item.id == "1003":
+        for value in questions:                                            
+   
+            item = models.Question.get_item(value)
+            
+            
+            if value in ["1002", "1003"]:
                 item.enabled = False
-            else:
-                item.enabled = True
-        
-            if item.id in ["1002", "1006"]:
+            
+            
+            if value in ["1002", "1006", "1009"]:
                 item.is_additional = True
-                
+    
+            item.order = order
+            order += 1
+                 
+            item.put()          
         
-        db.put(questions)        
         
-        questions = models.Question.gql("WHERE enabled=True Order by id asc").fetch(100)
+        questions = models.Question.gql("WHERE enabled=True Order by order asc").fetch(100)
                 
         for item in questions:            
             item.prev = last
